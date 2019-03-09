@@ -32,6 +32,7 @@ void SNMPServer::readSNMP(){
 
               if(QString::compare(request->type, "GET", Qt::CaseInsensitive) == 0)
               {
+                 qDebug() << "eceive GET requset";
                  SNMPGetRequset *getRequest = static_cast<SNMPGetRequset*>(request);
                  QByteArray sendData = QByteArray(1,0x30);
                  sendData.resize(sendData.size()+5);
