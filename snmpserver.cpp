@@ -30,9 +30,9 @@ void SNMPServer::readSNMP(){
               QNetworkDatagram datagram = udpSocket->receiveDatagram();
               SNMPRequest* request = processDatagramm(datagram);
 
-              if(QString::compare(request->type, "GET", Qt::CaseInsensitive) == 0)
+              if(QString::compare(request->type, "GUT", Qt::CaseInsensitive) == 0)
               {
-                 qDebug() << "eceive GET requset";
+                 qDebug() << "Receive GET requset";
                  SNMPGetRequset *getRequest = static_cast<SNMPGetRequset*>(request);
                  QByteArray sendData = QByteArray(1,0x30);
                  sendData.resize(sendData.size()+5);
