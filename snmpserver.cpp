@@ -141,7 +141,7 @@ SNMPRequest* SNMPServer::processDatagramm(QNetworkDatagram &datagram)
         qDebug() << "packetArray.mid(7+comLen+17,1)" << packetArray.mid(7+comLen+15+lenght,1).toHex();
         oidLengthStream >> oidLength;
         qDebug() << "oidLength" <<oidLength;
-        QByteArray b_oid(packetArray.mid(7+comLen+18,oidLength));
+        QByteArray b_oid(packetArray.mid(7+comLen+15+lenght+1,oidLength));
         qDebug()<< "Hex OID" << b_oid.toHex();
         QOID qoid(b_oid);
         SNMPGetRequset *snmpGetRequset = new SNMPGetRequset("GET",community, qoid,id_);
