@@ -56,11 +56,17 @@ void SNMPServer::readSNMP(){
 
                  //Append var
                  QByteArray varBindList(getRequest->oid.b_oid->data());
+                 // Object ID
+                 varBindList.insert(0,static_cast<char>(0x06));
+                 varBindList.insert(1,static_cast<char>(getRequest->oid.b_oid->length()));
+
                  varBindList.insert(0,0x30);
                  varBindList.insert(1,static_cast<char>(varBindList.length()+answer_size-1));
                  varBindList.insert(0,0x30);
                  varBindList.insert(1,static_cast<char>(varBindList.length()+answer_size-1));
                  varBindList.append(answer,2);
+
+
 
                  QByteArray b;
                  QDataStream b_str(&b,QIODevice::WriteOnly | QIODevice::Append);
@@ -131,8 +137,8 @@ SNMPRequest* SNMPServer::processDatagramm(QNetworkDatagram &datagram)
         QDataStream requestTypeLengthStream(packetArray.mid(7+comLen+1,1));
         requestTypeLengthStream >> requestTypeLength;
         qint8 oidLength;
-        QDataStream oidLengthStream(packetArray.mid(7+comLen+17,1));
-        qDebug() << "packetArray.mid(7+comLen+17,1)" << packetArray.mid(7+comLen+17,1).toHex();
+        QDataStream oidLengthStream(packetArray.mid(7+comLen+15+lenght,1));
+        qDebug() << "packetArray.mid(7+comLen+17,1)" << packetArray.mid(7+comLen+15+lenght,1).toHex();
         oidLengthStream >> oidLength;
         qDebug() << "oidLength" <<oidLength;
         QByteArray b_oid(packetArray.mid(7+comLen+18,oidLength));
