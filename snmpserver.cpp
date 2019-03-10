@@ -57,23 +57,26 @@ void SNMPServer::readSNMP(){
                  QByteArray b;
                  QDataStream b_str(&b,QIODevice::WriteOnly | QIODevice::Append);
                  b_str.setByteOrder(QDataStream::BigEndian);
-                 b_str << qint32(4444);
+                 b_str << qint32(0x00000001);
                  varBindList.append(answer,2);
                  varBindList.append(b,answer_size);
-                 qDebug() << getRequest->oid.b_oid->toHex();
 
+                 qDebug() << getRequest->oid.b_oid->toHex();
                  qDebug() <<"varBind:" <<varBindList.toHex();
 
+                 //SNMP RESPONSE:
                  sendData.append(0xa2);
                  sendData.append(varBindList.length()+8+getRequest->id.length());
                  sendData.append(0x02);
                  sendData.append(getRequest->id.length());
                  sendData.append(getRequest->id.data());
+
                  const char arr1[] = {0x02, 0x01, 0x00};
                  sendData.append(arr1,3);
                  sendData.append(arr1,3);
                  sendData.append(varBindList);
                  sendData[1]=static_cast<char>(sendData.length()-2);
+
                  //QByteArray responseData(30,0x00);
                  qDebug() << "Send Data:"<<sendData.toHex();
                  udpSocket->writeDatagram(sendData,datagram.senderAddress(),datagram.senderPort());
@@ -118,7 +121,7 @@ SNMPRequest* SNMPServer::processDatagramm(QNetworkDatagram &datagram)
         qint8 oidLength;
         QDataStream oidLengthStream(packetArray.mid(7+comLen+17,1));
         oidLengthStream >> oidLength;
-        QByteArray b_oid(packetArray.mid(7+comLen+16,oidLength+2));
+        QByteArray b_oid(packetArray.mid(7+comLen+16,oidLength+1));
         QOID qoid(b_oid);
         SNMPGetRequset *snmpGetRequset = new SNMPGetRequset("GET",community, qoid,id_);
         return snmpGetRequset;
