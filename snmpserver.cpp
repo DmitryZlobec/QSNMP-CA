@@ -66,7 +66,7 @@ void SNMPServer::readSNMP(){
 
                  //SNMP RESPONSE:
                  sendData.append(0xa2);
-                 sendData.append(varBindList.length()+7+getRequest->id.length());
+                 sendData.append(varBindList.length()+8+getRequest->id.length());
                  sendData.append(0x02);
                  sendData.append(getRequest->id.length());
                  sendData.append(getRequest->id.data());
