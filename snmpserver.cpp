@@ -49,9 +49,9 @@ void SNMPServer::readSNMP(){
 
                  QByteArray varBindList(getRequest->oid.b_oid->data());
                  varBindList.insert(0,0x30);
-                 varBindList.insert(1,varBindList.length()+1+answer_size);
+                 varBindList.insert(1,varBindList.length()+1+5+answer_size);
                  varBindList.insert(0,0x30);
-                 varBindList.insert(1,varBindList.length()+1+answer_size);
+                 varBindList.insert(1,varBindList.length()+1+5+answer_size);
 
                  const char answer[] = {0x02,0x04};
                  QByteArray b;
