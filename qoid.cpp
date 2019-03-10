@@ -22,7 +22,7 @@ QOID::QOID( QOID &oid)
 QOID QOID::operator=(QOID oid) {
         if(this != &oid)
         {
-            if(this->b_oid != NULL) delete this->b_oid;
+            if(this->b_oid != nullptr) delete this->b_oid;
             b_oid = new QByteArray(oid.b_oid->data());
         }
         return *this;
