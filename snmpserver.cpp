@@ -38,7 +38,8 @@ void SNMPServer::readSNMP(){
                  sendData.resize(sendData.size()+5);
                  int answer_size=4;
                  int len= getRequest->getCommunity().length();
-                 sendData[1]=35+len+ answer_size;
+
+                 sendData[1]=0xff;
                  sendData[2]=0x02;
                  sendData[3]=0x01;
                  sendData[4]=0x00;
@@ -72,6 +73,7 @@ void SNMPServer::readSNMP(){
                  sendData.append(arr1,3);
                  sendData.append(arr1,3);
                  sendData.append(varBindList);
+                 sendData[1]=static_cast<char>(sendData.length()-2);
                  //QByteArray responseData(30,0x00);
                  qDebug() << "Send Data:"<<sendData.toHex();
                  udpSocket->writeDatagram(sendData,datagram.senderAddress(),datagram.senderPort());
