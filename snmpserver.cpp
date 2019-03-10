@@ -57,7 +57,7 @@ void SNMPServer::readSNMP(){
                  QByteArray b;
                  QDataStream b_str(&b,QIODevice::WriteOnly | QIODevice::Append);
                  b_str.setByteOrder(QDataStream::BigEndian);
-                 b_str << qint32(65535);
+                 b_str << qint32(4444);
                  varBindList.append(answer,2);
                  varBindList.append(b,answer_size);
                  qDebug() << getRequest->oid.b_oid->toHex();
