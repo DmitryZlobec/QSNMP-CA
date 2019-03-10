@@ -66,15 +66,18 @@ void SNMPServer::readSNMP(){
 
                  //SNMP RESPONSE:
                  sendData.append(0xa2);
-                 sendData.append(varBindList.length()+8+getRequest->id.length());
+                 sendData.append(varBindList.length()+4+getRequest->id.length());
                  sendData.append(0x02);
                  sendData.append(getRequest->id.length());
                  sendData.append(getRequest->id.data());
 
-                 const char arr1[] = {0x02, 0x01, 0x00};
-                 sendData.append(arr1,3);
-                 sendData.append(arr1,3);
+                 const char error_status[] = {0x02, 0x01, 0x00};
+                 sendData.append(error_status,3);
+                 const char error_index[] = {0x02, 0x01, 0x00};
+                 sendData.append(error_index,3);
                  sendData.append(varBindList);
+
+
                  sendData[1]=static_cast<char>(sendData.length()-2);
 
                  //QByteArray responseData(30,0x00);
