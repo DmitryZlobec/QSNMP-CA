@@ -80,7 +80,6 @@ void SNMPServer::readSNMP(){
 
                  sendData[1]=static_cast<char>(sendData.length()-2);
 
-                 //QByteArray responseData(30,0x00);
                  qDebug() << "Send Data:"<<sendData.toHex();
                  udpSocket->writeDatagram(sendData,datagram.senderAddress(),datagram.senderPort());
               return;
@@ -124,7 +123,7 @@ SNMPRequest* SNMPServer::processDatagramm(QNetworkDatagram &datagram)
         qint8 oidLength;
         QDataStream oidLengthStream(packetArray.mid(7+comLen+17,1));
         oidLengthStream >> oidLength;
-        QByteArray b_oid(packetArray.mid(7+comLen+16,oidLength));
+        QByteArray b_oid(packetArray.mid(7+comLen+18,oidLength-2));
         qDebug()<< "Hex OID" << b_oid.toHex();
         QOID qoid(b_oid);
         SNMPGetRequset *snmpGetRequset = new SNMPGetRequset("GET",community, qoid,id_);
