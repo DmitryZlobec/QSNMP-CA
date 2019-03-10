@@ -37,7 +37,10 @@ void SNMPServer::readSNMP(){
                  SNMPGetRequset *getRequest = static_cast<SNMPGetRequset*>(request);
                  QByteArray sendData = QByteArray(1,0x30);
                  sendData.resize(sendData.size()+5);
-                 int answer_size=NULL_ASNWER_SIZE;
+                 int answer_size=NULL_ASNWER_SIZE+2;
+                 //const char answer[] = {0x05,0x00};
+                 const char answer[] = {0x02,0x02};
+
                  int len= getRequest->getCommunity().length();
 
                  sendData[1]=0xff;
@@ -53,13 +56,13 @@ void SNMPServer::readSNMP(){
                  varBindList.insert(1,varBindList.length()+answer_size-1);
                  varBindList.insert(0,0x30);
                  varBindList.insert(1,varBindList.length()+answer_size-1);
+                 varBindList.append(answer,2);
 
-                 const char answer[] = {0x05,0x00};
                  QByteArray b;
                  QDataStream b_str(&b,QIODevice::WriteOnly | QIODevice::Append);
                  b_str.setByteOrder(QDataStream::BigEndian);
                  b_str << qint16(0x0000);
-                 varBindList.append(answer,2);
+
 
                  if(answer_size>NULL_ASNWER_SIZE)
                    varBindList.append(b,answer_size);
