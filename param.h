@@ -6,10 +6,11 @@ class Param
 {
 public:
     Param();
-    QString oid;
-    QString type;
-    QString class_type;
-    QString value;
+    Param(QString ,QString, QString, QString);
+    QString oid{"NONE"};
+    QString class_type{"NONE"};
+    QString type{"NONE"};
+    QString value{"NONE"};
 };
 
 #endif // PARAM_H
