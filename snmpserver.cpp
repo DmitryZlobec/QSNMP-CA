@@ -1,25 +1,31 @@
 #include<QUdpSocket>
 #include<QNetworkDatagram>
 #include<QDataStream>
+#include <QSharedPointer>
 #include "snmpserver.h"
 #include "snmpgetrequset.h"
 #include "snmprequest.h"
+#include"appconfig.h"
+#include "applicationclass.h"
 #include "qoid.h"
-SNMPServer* SNMPServer::m_server = NULL;
+SNMPServer* SNMPServer::m_server = nullptr;
 
 SNMPServer::SNMPServer(QObject *parent):QObject(parent)
 {
-    enum {SNMP_PORT=161};
+    ApplicationClass *app = qobject_cast<ApplicationClass*>(parent);
+    AppConfig *appConfig =  AppConfig::getConfig();
+    qint16 SNMP_PORT =161;
+
     udpSocket = new QUdpSocket(this);
     udpSocket->bind(QHostAddress::LocalHost,SNMP_PORT);
     connect(udpSocket,SIGNAL(readyRead()),this,SLOT(readSNMP()));
+
 }
 SNMPServer* SNMPServer::instance(QObject* parent)
 {
     if(!SNMPServer::m_server)
     {
         SNMPServer::m_server = new SNMPServer(parent);
-
     }
     return m_server;
 }
@@ -66,8 +72,6 @@ void SNMPServer::readSNMP(){
                  varBindList.insert(1,static_cast<char>(varBindList.length()+answer_size-1));
                  varBindList.append(answer,2);
 
-
-
                  QByteArray b;
                  QDataStream b_str(&b,QIODevice::WriteOnly | QIODevice::Append);
                  b_str.setByteOrder(QDataStream::BigEndian);
@@ -92,7 +96,6 @@ void SNMPServer::readSNMP(){
                  const char error_index[] = {0x02, 0x01, 0x00};
                  sendData.append(error_index,3);
                  sendData.append(varBindList);
-
 
                  sendData[1]=static_cast<char>(sendData.length()-2);
 
@@ -157,6 +160,7 @@ SNMPServer::~SNMPServer()
         udpSocket->close();
         delete udpSocket;
         delete m_server;
+
     }
 
 }

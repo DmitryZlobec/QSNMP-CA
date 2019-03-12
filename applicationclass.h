@@ -2,8 +2,8 @@
 #define APPLICATIONCLASS_H
 #include<QCoreApplication>
 #include <QObject>
+#include <QSettings>
 #include "snmpserver.h"
-
 class ApplicationClass:public QObject
 {
     Q_OBJECT

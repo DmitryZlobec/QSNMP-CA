@@ -2,6 +2,7 @@
 #define SNMPSERVER_H
 #include<QObject>
 #include<QUdpSocket>
+#include<QSettings>
 #include"snmprequest.h"
 #include"snmpgetrequset.h"
 class SNMPServer:public QObject
@@ -10,9 +11,9 @@ class SNMPServer:public QObject
   QUdpSocket* udpSocket;
   SNMPRequest* processDatagramm(QNetworkDatagram &datagram);
   static  SNMPServer *m_server;
-
   SNMPServer(QObject* parent=0);
   ~SNMPServer();
+  QSharedPointer<QSettings> settings;
 public:
     static   SNMPServer* instance(QObject* parent);
 
