@@ -13,7 +13,7 @@ public:
     ~AppConfig();
     static AppConfig* getConfig();
     qint16 SNMP_PORT{161};
-    QList<QSharedPointer<Param>>* params;
+    QMap<QString,QSharedPointer<Param>>* params;
 };
 
 #endif // APPCONFIG_H

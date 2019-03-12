@@ -147,6 +147,16 @@ SNMPRequest* SNMPServer::processDatagramm(QNetworkDatagram &datagram)
         QByteArray b_oid(packetArray.mid(7+comLen+15+lenght+1,oidLength));
         qDebug()<< "Hex OID" << b_oid.toHex();
         QOID qoid(b_oid);
+        QString s_oid = qoid.getOID();
+
+        qDebug()<< "String OID" << qoid.getOID();
+        AppConfig *appConfig =  AppConfig::getConfig();
+
+        if(appConfig->params->contains(s_oid))
+        {
+            QSharedPointer<Param> p = appConfig->params->operator[](s_oid);
+            qDebug() << "Value:" << p->value;
+        }
         SNMPGetRequset *snmpGetRequset = new SNMPGetRequset("GET",community, qoid,id_);
         return snmpGetRequset;
     }

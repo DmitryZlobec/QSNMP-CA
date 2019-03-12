@@ -34,8 +34,11 @@ QString QOID::getOID()
 {
     QString s_oid;
 
-    qint32 x = static_cast<unsigned char>(b_oid->at(2)) / 40;
-    qint32 y = static_cast<unsigned char>(b_oid->at(2)) % 40;
+    QByteArray b_arr(1,0x06);
+    b_arr.append(static_cast<char>(b_oid->length()));
+    b_arr.append(b_oid->data());
+    qint32 x = static_cast<unsigned char>(b_arr.at(2)) / 40;
+    qint32 y = static_cast<unsigned char>(b_arr.at(2)) % 40;
 
     if(x>2)
     {
@@ -49,10 +52,10 @@ QString QOID::getOID()
 
      quint64 val=0;
 
-    for (qint32 i = 3; i < b_oid->size(); i++)
+    for (qint32 i = 3; i < b_arr.size(); i++)
         {
-            val = ((val << 7) | (static_cast<unsigned char>((b_oid->at(i) & 0x7F))));
-            if (!((b_oid->at(i) & 0x80) == 0x80))
+            val = ((val << 7) | (static_cast<unsigned char>((b_arr.at(i) & 0x7F))));
+            if (!((b_arr.at(i) & 0x80) == 0x80))
             {
                 s_oid.append('.');
                 s_oid.append(QString::number(val));

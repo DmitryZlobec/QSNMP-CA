@@ -2,12 +2,14 @@
 #include "param.h"
 #include <QSharedPointer>
 #include<QDebug>
+#include<QMap>
+#include<QString>
 AppConfig* AppConfig::m_appConfig = nullptr;
 
 AppConfig::AppConfig()
 {
         settings.reset(new QSettings("qsnmp.ini",QSettings::IniFormat));
-        params = new QList<QSharedPointer<Param>>();
+        params = new QMap<QString, QSharedPointer<Param>>();
         qint16 t_SNMP_PORT= settings->value("system/port").toInt();
         if(t_SNMP_PORT >0)
         {
@@ -24,12 +26,11 @@ AppConfig::AppConfig()
         QString _value = settings->value("value").toString();
         QString _type = settings->value("type").toString();
         QSharedPointer<Param> p = QSharedPointer<Param>(new Param(_oid, _class_type,_type,_value));
-        params->append(p);
-
-        qDebug() << "----";
-
+        params->insert(_oid,p);
      settings->endGroup();
     }
+
+    qDebug() << params->size()  << " OIDs loaded";
 
 }
 
