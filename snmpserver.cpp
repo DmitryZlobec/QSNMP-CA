@@ -39,14 +39,33 @@ void SNMPServer::readSNMP(){
               if(QString::compare(request->type, "GET", Qt::CaseInsensitive) == 0)
               {
                  const qint16 NULL_ANSWER_SIZE=2;
-                 const char answer[] = {0x05,0x00};
+                 QByteArray answer = {0x05,0x00};
                  int answer_size=NULL_ANSWER_SIZE;
-
 
                  qDebug() << "Receive GET requset";
                  SNMPGetRequset *getRequest = static_cast<SNMPGetRequset*>(request);
-                 QByteArray sendData = QByteArray(1,0x30);
+                 AppConfig *appConfig =  AppConfig::getConfig();
 
+                 QString s_oid = getRequest->oid.getOID();
+                 if(appConfig->params->contains(s_oid))
+                 {
+                     QSharedPointer<Param> p = appConfig->params->operator[](s_oid);
+                     qDebug() << "Value:" << p->value;
+
+                     if (p->type == "Integer")
+                     {
+                       answer[0] = 0x02;
+                       answer[1] = sizeof(qint32);
+                       answer_size+=sizeof(qint32);
+                       QByteArray answerData;
+                       QDataStream answerDataStream(&answerData,QIODevice::ReadWrite);
+                       answerDataStream << p->getParamInt();
+                       qDebug() << "answerData.data() " <<answerData.toHex();
+                       answer.append(answerData.data());
+                     }
+                 }
+
+                 QByteArray sendData = QByteArray(1,0x30);
 
                  //Append lenght of packet
                  sendData.append(static_cast<char>(0xff));
@@ -70,7 +89,7 @@ void SNMPServer::readSNMP(){
                  varBindList.insert(1,static_cast<char>(varBindList.length()+answer_size-1));
                  varBindList.insert(0,0x30);
                  varBindList.insert(1,static_cast<char>(varBindList.length()+answer_size-1));
-                 varBindList.append(answer,2);
+                 varBindList.append(answer.data(),answer_size);
 
                  QByteArray b;
                  QDataStream b_str(&b,QIODevice::WriteOnly | QIODevice::Append);
@@ -78,8 +97,9 @@ void SNMPServer::readSNMP(){
                  b_str << qint16(0x0000);
 
 
-                 if(answer_size>NULL_ANSWER_SIZE)
-                   varBindList.append(b,answer_size-NULL_ANSWER_SIZE);
+                 //if(answer_size>NULL_ANSWER_SIZE)
+                 //  varBindList.append(b,answer_size-NULL_ANSWER_SIZE);
+
 
                  qDebug() << getRequest->oid.b_oid->toHex();
                  qDebug() <<"varBind:" <<varBindList.toHex();
@@ -150,13 +170,7 @@ SNMPRequest* SNMPServer::processDatagramm(QNetworkDatagram &datagram)
         QString s_oid = qoid.getOID();
 
         qDebug()<< "String OID" << qoid.getOID();
-        AppConfig *appConfig =  AppConfig::getConfig();
 
-        if(appConfig->params->contains(s_oid))
-        {
-            QSharedPointer<Param> p = appConfig->params->operator[](s_oid);
-            qDebug() << "Value:" << p->value;
-        }
         SNMPGetRequset *snmpGetRequset = new SNMPGetRequset("GET",community, qoid,id_);
         return snmpGetRequset;
     }

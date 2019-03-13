@@ -11,6 +11,8 @@ public:
     QString class_type{"NONE"};
     QString type{"NONE"};
     QString value{"NONE"};
+    QString getParamString();
+    qint32 getParamInt();
 };
 
 #endif // PARAM_H

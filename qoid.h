@@ -7,7 +7,6 @@
 class QOID
 {
 
-
 public:
     QByteArray *b_oid = NULL;
     QOID(QByteArray&);
