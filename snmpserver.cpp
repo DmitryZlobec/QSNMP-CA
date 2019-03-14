@@ -39,7 +39,8 @@ void SNMPServer::readSNMP(){
               if(QString::compare(request->type, "GET", Qt::CaseInsensitive) == 0)
               {
                  const qint16 NULL_ANSWER_SIZE=2;
-                 QByteArray answer({0x05,0x00});
+                 const char rawAnswer[] = {'\x05','\x00'};
+                 QByteArray answer = QByteArray::fromRawData(rawAnswer,sizeof(rawAnswer));
                  int answer_size=NULL_ANSWER_SIZE;
 
                  qDebug() << "Receive GET requset";
@@ -55,23 +56,33 @@ void SNMPServer::readSNMP(){
 
                      if (p->type == "Integer")
                      {
-                       answer[0] = 0x02;
-                       answer[1] = sizeof(qint32);
+                       answer.clear();
+                       answer.append('\x02'); //Integer
+                       answer.append(sizeof(qint32));
                        answer_size+=sizeof(qint32);
                        QByteArray answerData;
                        QDataStream answerDataStream(&answerData,QIODevice::ReadWrite);
                        answerDataStream << p->getParamInt();
                        //TODO: BUG Here
                        qDebug() << "answerData.data() " <<answerData.toHex();
-                       answer.insert(2,answerData);
+                       answer.append(QByteArray::fromRawData(answerData.data(),sizeof(qint32)));
                        qDebug() << "answer " <<answer.toHex();
                      }
+                        if(p->type == "String")
+                        {
+                            int stringSize = p->getParamString().toLatin1().length();
+                            answer.clear();
+                            answer.append('\x04'); //Octet String
+                            answer.append(static_cast<char>(stringSize));
+                            answer.append(p->getParamString().toLatin1());
+                            answer_size+=stringSize;
+                        }
                  }
 
-                 QByteArray sendData = QByteArray(1,0x30);
+                 QByteArray sendData = QByteArray(1,'\x30');
 
                  //Append lenght of packet
-                 sendData.append(static_cast<char>(0xff));
+                 sendData.append(static_cast<char>('\xff'));
 
                  //Append version
                  const char version[] = {0x02,0x01,0x00};
@@ -94,7 +105,7 @@ void SNMPServer::readSNMP(){
                  varBindList.insert(1,static_cast<char>(varBindList.length()+answer_size-1));
 
                  qDebug() << "varBindList.append(answer.data(),answer_size)" << answer.toHex();
-                  varBindList.append(answer.data(),answer_size);
+                  varBindList.append(QByteArray::fromRawData(answer,answer_size));
 
                  QByteArray b;
                  QDataStream b_str(&b,QIODevice::WriteOnly | QIODevice::Append);
