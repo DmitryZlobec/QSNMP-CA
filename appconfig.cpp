@@ -5,10 +5,10 @@
 #include<QMap>
 #include<QString>
 AppConfig* AppConfig::m_appConfig = nullptr;
-
+extern  QString configFileName;
 AppConfig::AppConfig()
 {
-        settings.reset(new QSettings("qsnmp.ini",QSettings::IniFormat));
+        settings.reset(new QSettings(configFileName,QSettings::IniFormat));
         params = new QMap<QString, QSharedPointer<Param>>();
         qint16 t_SNMP_PORT= settings->value("system/port").toInt();
         if(t_SNMP_PORT >0)

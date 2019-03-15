@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QSettings>
 #include "snmpserver.h"
+extern QString configFileName;
+extern QString logFileName;
+
 class ApplicationClass:public QObject
 {
     Q_OBJECT
@@ -11,8 +14,9 @@ class ApplicationClass:public QObject
     SNMPServer *snmpServer;
 
 public:
-    explicit ApplicationClass(QObject *parent=0);
+    explicit ApplicationClass(QObject *parent=nullptr);
     void quit();
+    QString configFile {"qsnmp.ini"};
 
 
 signals:
