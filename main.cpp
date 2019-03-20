@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <iostream>
 #include<QObject>
 #include<QTimer>
 #include<QCommandLineParser>
@@ -52,21 +53,44 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription("QSNMP-CA helper");
     parser.addHelpOption();
     parser.addVersionOption();
-    parser.addPositionalArgument("config", QCoreApplication::translate("config", "Config file."));
+
+    QCommandLineOption conigFileOption(QStringList() << "c" << "config-file",
+                 QCoreApplication::translate("main", "Config file <config-file>."),
+                 QCoreApplication::translate("main", "config-file"));
+    QCommandLineOption logFileOption(QStringList() << "l" << "log-file",
+                 QCoreApplication::translate("main", "Log file <log-file>."),
+                 QCoreApplication::translate("main", "log-file"));
+    parser.addOption(conigFileOption);
+    parser.addOption(logFileOption);
     parser.process(a);
 
-    const QStringList args = parser.positionalArguments();
-    if(args.size()>0)
+    QString configFileNameArgument = parser.value(conigFileOption);
+    QString logFileNameArgument = parser.value(logFileOption);
+
+    if(configFileNameArgument.length()>0)
     {
-        QFileInfo configFile(args.at(0));
-        if(configFile.exists())
-        {
-                configFileName = args.at(0);
-        }
+        configFileName = configFileNameArgument;
+    }
+
+    if(logFileNameArgument.length()>0)
+    {
+        logFileName = logFileNameArgument;
+    }
+
+    std::cout << "Qt SNMP Common Agent 2019" << std::endl;
+    std::cout << "Config file name: " << configFileName.toStdString() << std::endl;
+    std::cout << "Log file name: " << logFileName.toStdString() << std::endl;
+
+    QFileInfo confFile(configFileName);
+    if(!confFile.exists())
+    {
+        std::cout << "No config file found!" <<std::endl;
+        abort();
     }
 
     ApplicationClass snmpApp;
     snmpApp.configFile = configFileName;
+
     QObject::connect(&snmpApp,SIGNAL(finished()),&a,SLOT(quit()));
     QObject::connect(&a,SIGNAL(aboutToQuit()),&snmpApp,SLOT(aboutToQuitApp()));
     QTimer::singleShot(10,&snmpApp,SLOT(run()));

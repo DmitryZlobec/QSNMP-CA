@@ -140,10 +140,9 @@ void SNMPServer::readSNMP(){
               return;
               }
 
-           QByteArray sendData = datagram.data();
-
-              sendData[7+1] = static_cast<char>(0xa2);
-              udpSocket->writeDatagram(sendData,datagram.senderAddress(),datagram.senderPort());
+          //    QByteArray sendData = datagram.data();
+          //    sendData[7+1] = static_cast<char>(0xa2);
+          //    udpSocket->writeDatagram(sendData,datagram.senderAddress(),datagram.senderPort());
               delete request;
           }
 }
