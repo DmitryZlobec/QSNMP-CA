@@ -3,6 +3,9 @@
 #include<QObject>
 #include<QUdpSocket>
 #include<QSettings>
+#include <mongocxx/client.hpp>
+#include <mongocxx/instance.hpp>
+
 #include"snmprequest.h"
 #include"snmpgetrequset.h"
 class SNMPServer:public QObject

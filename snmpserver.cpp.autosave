@@ -108,6 +108,8 @@ void SNMPServer::readSNMP(){
                             bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(session,document.view());
                             if(maybe_result) {
                               // Do something with *maybe_result;
+                                if(maybe_result)
+                            
                             }
                             else {
                                 qDebug() << "Couldn't find an object";
