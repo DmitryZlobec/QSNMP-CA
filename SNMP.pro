@@ -24,7 +24,8 @@ SOURCES += \
     snmpgetrequset.cpp \
     snmprequest.cpp \
     param.cpp \
-    appconfig.cpp
+    appconfig.cpp \
+    snmpservice.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -38,4 +39,7 @@ HEADERS += \
     snmpgetrequset.h \
     snmprequest.h \
     param.h \
-    appconfig.h
+    appconfig.h \
+    snmpservice.h
+
+

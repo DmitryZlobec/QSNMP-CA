@@ -7,8 +7,9 @@
 #include <QtGlobal>
 #include <QTextStream>
 #include <QDateTime>
-#include"applicationclass.h"
-#include"snmpserver.h"
+#include "applicationclass.h"
+#include "snmpserver.h"
+#include "snmpservice.h"
 
 QString configFileName = "qsnmp.ini";
 QString logFileName = "qsnmp.log";
@@ -46,7 +47,6 @@ void snmpDebugMessageHandler(QtMsgType type, const QMessageLogContext &context, 
 int main(int argc, char *argv[])
 {
     qInstallMessageHandler(snmpDebugMessageHandler);
-    QCoreApplication a(argc, argv);
     QCoreApplication::setApplicationName("QSNMP-CA");
     QCoreApplication::setApplicationVersion("0.1");
     QCommandLineParser parser;
@@ -60,39 +60,66 @@ int main(int argc, char *argv[])
     QCommandLineOption logFileOption(QStringList() << "l" << "log-file",
                  QCoreApplication::translate("main", "Log file <log-file>."),
                  QCoreApplication::translate("main", "log-file"));
+    QCommandLineOption asServiceOption(QStringList() << "s" << "service",
+                QCoreApplication::translate("main", "Run as sevice."));
+    parser.addOption(asServiceOption);
     parser.addOption(conigFileOption);
     parser.addOption(logFileOption);
-    parser.process(a);
 
-    QString configFileNameArgument = parser.value(conigFileOption);
+    QStringList arguments;
+    for(int k=0;k<argc;++k)
+    {
+        arguments <<QString(argv[k]);
+    }
+    parser.process(arguments);
+
+
     QString logFileNameArgument = parser.value(logFileOption);
 
-    if(configFileNameArgument.length()>0)
+    if(parser.isSet(conigFileOption))
     {
-        configFileName = configFileNameArgument;
+        configFileName = parser.value(conigFileOption);
     }
 
-    if(logFileNameArgument.length()>0)
+    if(parser.isSet(logFileOption))
     {
-        logFileName = logFileNameArgument;
+        logFileName = parser.value(logFileOption);
     }
 
-    std::cout << "Qt SNMP Common Agent 2019" << std::endl;
-    std::cout << "Config file name: " << configFileName.toStdString() << std::endl;
-    std::cout << "Log file name: " << logFileName.toStdString() << std::endl;
+    bool asService = parser.isSet(asServiceOption);
 
-    QFileInfo confFile(configFileName);
-    if(!confFile.exists())
+    if(asService)
     {
-        std::cout << "No config file found!" <<std::endl;
-        abort();
+        QFileInfo confFile(configFileName);
+        if(!confFile.exists())
+        {
+            qDebug() << "No config file found!";
+            abort();
+        }
+        SNMPService service(argc, argv);
+        return service.exec();
+
     }
+    else
+    {
+        std::cout << "Qt SNMP Common Agent 2019" << std::endl;
+        std::cout << "Config file name: " << configFileName.toStdString() << std::endl;
+        std::cout << "Log file name: " << logFileName.toStdString() << std::endl;
 
-    ApplicationClass snmpApp;
-    snmpApp.configFile = configFileName;
+        QFileInfo confFile(configFileName);
+        if(!confFile.exists())
+        {
+            std::cout << "No config file found!" <<std::endl;
+            abort();
+        }
 
-    QObject::connect(&snmpApp,SIGNAL(finished()),&a,SLOT(quit()));
-    QObject::connect(&a,SIGNAL(aboutToQuit()),&snmpApp,SLOT(aboutToQuitApp()));
-    QTimer::singleShot(10,&snmpApp,SLOT(run()));
-    return a.exec();
+        QCoreApplication a(argc, argv);
+        ApplicationClass snmpApp;
+        snmpApp.configFile = configFileName;
+        QObject::connect(&snmpApp,SIGNAL(finished()),&a,SLOT(quit()));
+        QObject::connect(&a,SIGNAL(aboutToQuit()),&snmpApp,SLOT(aboutToQuitApp()));
+        QTimer::singleShot(10,&snmpApp,SLOT(run()));
+
+        return a.exec();
+    }
 }
