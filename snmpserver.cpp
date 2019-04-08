@@ -108,6 +108,32 @@ void SNMPServer::readSNMP(){
                             bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(session,document.view());
                             if(maybe_result) {
                               // Do something with *maybe_result;
+                                auto v = (*maybe_result).view();
+                                bsoncxx::document::element k_oid {v["oid"]};
+                                if(!k_oid || k_oid.type() == bsoncxx::type::k_int32)
+                                {
+                                    int32_t oid_value = k_oid.get_int32();
+                                    answer.clear();
+                                    answer.append('\x02'); //Integer
+                                    answer.append(sizeof(qint32));
+                                    answer_size+=sizeof(qint32);
+                                    QByteArray answerData;
+                                    QDataStream answerDataStream(&answerData,QIODevice::ReadWrite);
+                                    answerDataStream << oid_value;
+                                    answer.append(QByteArray::fromRawData(answerData.data(),sizeof(qint32)));
+                                }
+                                else if (!k_oid || k_oid.type() == bsoncxx::type::k_utf8)
+                                {
+                                    bsoncxx::stdx::string_view view = k_oid.get_utf8().value;
+                                    std::string oid_value = view.to_string();
+                                    int32_t stringSize = oid_value.length();
+                                    answer.clear();
+                                    answer.append('\x04'); //Octet String
+                                    answer.append(static_cast<char>(stringSize));
+                                    answer.append(oid_value.data());
+                                    answer_size+=stringSize;
+                                }
+
                             }
                             else {
                                 qDebug() << "Couldn't find an object";
