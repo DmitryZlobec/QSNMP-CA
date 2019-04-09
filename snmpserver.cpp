@@ -34,6 +34,7 @@ SNMPServer* SNMPServer::instance(QObject* parent)
     if(!SNMPServer::m_server)
     {
         SNMPServer::m_server = new SNMPServer(parent);
+        mongocxx::instance inst{};
 
 
     }
@@ -89,27 +90,27 @@ void SNMPServer::readSNMP(){
                         }
                  }
 
-                 if(appConfig->params->contains("mongo"))
+                 if(appConfig->settings->contains("mongo/db"))
                  {
-                    mongocxx::instance inst{};
+                    qDebug() << "Mongo exist";
                     mongocxx::client conn{mongocxx::uri{}};
 
                     bsoncxx::builder::stream::document document{};
 
-                    if(appConfig->params->contains("mongo/db") && appConfig->params->contains("mongo/collection"))
+                    if(appConfig->settings->contains("mongo/db") && appConfig->settings->contains("mongo/collection"))
                     {
-                        auto db_name =appConfig->params->value("mongo/db")->getParamString().toStdString();
-                        auto collection_name =appConfig->params->value("mongo/collection")->getParamString().toStdString();
+                        auto db_name =appConfig->settings->value("mongo/db").toString().toStdString();
+                        auto collection_name =appConfig->settings->value("mongo/collection").toString().toStdString();
 
                         try {
                             auto collection = conn[db_name][collection_name];
                             auto session = conn.start_session();
-                            document << "oid" << s_oid.toStdString() << bsoncxx::builder::stream::finalize;
+                            document << "oid" << s_oid.toStdString(); // << bsoncxx::builder::stream::finalize;
                             bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(session,document.view());
                             if(maybe_result) {
                               // Do something with *maybe_result;
                                 auto v = (*maybe_result).view();
-                                bsoncxx::document::element k_oid {v["oid"]};
+                                bsoncxx::document::element k_oid {v["value"]};
                                 if(!k_oid || k_oid.type() == bsoncxx::type::k_int32)
                                 {
                                     int32_t oid_value = k_oid.get_int32();
@@ -147,7 +148,9 @@ void SNMPServer::readSNMP(){
                         qDebug() << "no DB and Collection params";
                     }
                  }
-
+                 else {
+                     qDebug() << "no Mongo sesction";
+                 }
                  QByteArray sendData = QByteArray(1,'\x30');
 
                  //Append lenght of packet

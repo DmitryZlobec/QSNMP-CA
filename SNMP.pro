@@ -45,14 +45,14 @@ HEADERS += \
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libmongocxx/lib/ -llibbsoncxx.dll
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libmongocxx/lib/ -llibbsoncxx.dlld
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libmongocxx/lib/ -llibbsoncxx.dll
 else:unix: LIBS += -L$$PWD/../../libmongocxx/lib/ -llibbsoncxx.dll
 
 INCLUDEPATH += $$PWD/../../libmongocxx/include/bsoncxx/v_noabi
 DEPENDPATH += $$PWD/../../libmongocxx/include/bsoncxx/v_noabi
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libmongocxx/lib/ -llibmongocxx.dll
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libmongocxx/lib/ -llibmongocxx.dlld
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libmongocxx/lib/ -llibmongocxx.dll
 else:unix: LIBS += -L$$PWD/../../libmongocxx/lib/ -llibmongocxx.dll
 
 INCLUDEPATH += $$PWD/../../libmongocxx/include/mongocxx/v_noabi
