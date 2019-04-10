@@ -63,7 +63,7 @@ void SNMPServer::readSNMP(){
                  if(appConfig->params->contains(s_oid))
                  {
                      QSharedPointer<Param> p = appConfig->params->operator[](s_oid);
-                     qDebug() << "Value:" << p->value;
+                     //qDebug() << "Value:" << p->value;
 
                      if (p->type == "Integer")
                      {
@@ -75,9 +75,9 @@ void SNMPServer::readSNMP(){
                        QDataStream answerDataStream(&answerData,QIODevice::ReadWrite);
                        answerDataStream << p->getParamInt();
                        //TODO: BUG Here
-                       qDebug() << "answerData.data() " <<answerData.toHex();
+                     //  qDebug() << "answerData.data() " <<answerData.toHex();
                        answer.append(QByteArray::fromRawData(answerData.data(),sizeof(qint32)));
-                       qDebug() << "answer " <<answer.toHex();
+                    //   qDebug() << "answer " <<answer.toHex();
                      }
                         if(p->type == "String")
                         {
@@ -176,7 +176,7 @@ void SNMPServer::readSNMP(){
                  varBindList.insert(0,0x30);
                  varBindList.insert(1,static_cast<char>(varBindList.length()+answer_size-1));
 
-                 qDebug() << "varBindList.append(answer.data(),answer_size)" << answer.toHex();
+                // qDebug() << "varBindList.append(answer.data(),answer_size)" << answer.toHex();
                   varBindList.append(QByteArray::fromRawData(answer,answer_size));
 
                  QByteArray b;
@@ -189,8 +189,8 @@ void SNMPServer::readSNMP(){
                  //  varBindList.append(b,answer_size-NULL_ANSWER_SIZE);
 
 
-                 qDebug() << getRequest->oid.b_oid->toHex();
-                 qDebug() <<"varBind:" <<varBindList.toHex();
+                // qDebug() << getRequest->oid.b_oid->toHex();
+                // qDebug() <<"varBind:" <<varBindList.toHex();
 
                  //SNMP RESPONSE:
                  sendData.append(static_cast<char>(0xa2));
@@ -207,7 +207,7 @@ void SNMPServer::readSNMP(){
 
                  sendData[1]=static_cast<char>(sendData.length()-2);
 
-                 qDebug() << "Send Data:"<<sendData.toHex();
+                 //qDebug() << "Send Data:"<<sendData.toHex();
                  udpSocket->writeDatagram(sendData,datagram.senderAddress(),datagram.senderPort());
               return;
               }
@@ -229,7 +229,7 @@ SNMPRequest* SNMPServer::processDatagramm(QNetworkDatagram &datagram)
     qint8 v1,v2,v3;
     qint8 version;
     QByteArray communityArray;
-    qDebug() << "Packet:" <<packetArray.toHex();
+   // qDebug() << "Packet:" <<packetArray.toHex();
     packetOut >>asn1>>len>>v1>>v2>>version>>v3>>comLen;
     communityArray.resize(comLen);
     QString community  = QString::fromLatin1(packetArray.mid(7,comLen));
@@ -239,7 +239,7 @@ SNMPRequest* SNMPServer::processDatagramm(QNetworkDatagram &datagram)
     requestTypeStream>> requestType;
     qint32 lenght = qint32(packetArray.mid(7+comLen+3,1).at(0));
     QByteArray id_ = packetArray.mid(7+comLen+4,lenght);
-    qDebug() << "Id:" << id_.toHex();
+    //qDebug() << "Id:" << id_.toHex();
 
     if(requestType == static_cast<qint8>(GET))
     {
@@ -248,11 +248,11 @@ SNMPRequest* SNMPServer::processDatagramm(QNetworkDatagram &datagram)
         requestTypeLengthStream >> requestTypeLength;
         qint8 oidLength;
         QDataStream oidLengthStream(packetArray.mid(7+comLen+15+lenght,1));
-        qDebug() << "packetArray.mid(7+comLen+17,1)" << packetArray.mid(7+comLen+15+lenght,1).toHex();
+      //  qDebug() << "packetArray.mid(7+comLen+17,1)" << packetArray.mid(7+comLen+15+lenght,1).toHex();
         oidLengthStream >> oidLength;
-        qDebug() << "oidLength" <<oidLength;
+        //qDebug() << "oidLength" <<oidLength;
         QByteArray b_oid(packetArray.mid(7+comLen+15+lenght+1,oidLength));
-        qDebug()<< "Hex OID" << b_oid.toHex();
+        //qDebug()<< "Hex OID" << b_oid.toHex();
         QOID qoid(b_oid);
         QString s_oid = qoid.getOID();
 
