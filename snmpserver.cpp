@@ -25,7 +25,7 @@ SNMPServer::SNMPServer(QObject *parent):QObject(parent)
     qint16 SNMP_PORT =161;
 
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(QHostAddress::LocalHost,SNMP_PORT);
+    udpSocket->bind(QHostAddress::AnyIPv4,SNMP_PORT);
     connect(udpSocket,SIGNAL(readyRead()),this,SLOT(readSNMP()));
 
 }
@@ -34,9 +34,6 @@ SNMPServer* SNMPServer::instance(QObject* parent)
     if(!SNMPServer::m_server)
     {
         SNMPServer::m_server = new SNMPServer(parent);
-        mongocxx::instance inst{};
-
-
     }
     return m_server;
 }
@@ -57,6 +54,9 @@ void SNMPServer::readSNMP(){
                  qDebug() << "Receive GET requset";
                  SNMPGetRequset *getRequest = static_cast<SNMPGetRequset*>(request);
                  AppConfig *appConfig =  AppConfig::getConfig();
+
+               if(appConfig->settings->contains("system/community") && getRequest->community.toLower() != appConfig->settings->value("system/community").toString().toLower())
+                    return;
 
                  QString s_oid = getRequest->oid.getOID();
 
@@ -93,7 +93,7 @@ void SNMPServer::readSNMP(){
                  if(appConfig->settings->contains("mongo/db"))
                  {
                     qDebug() << "Mongo exist";
-                    mongocxx::client conn{mongocxx::uri{}};
+
 
                     bsoncxx::builder::stream::document document{};
 
@@ -107,6 +107,7 @@ void SNMPServer::readSNMP(){
                             auto session = conn.start_session();
                             document << "oid" << s_oid.toStdString(); // << bsoncxx::builder::stream::finalize;
                             bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(session,document.view());
+
                             if(maybe_result) {
                               // Do something with *maybe_result;
                                 auto v = (*maybe_result).view();
@@ -183,14 +184,6 @@ void SNMPServer::readSNMP(){
                  QDataStream b_str(&b,QIODevice::WriteOnly | QIODevice::Append);
                  b_str.setByteOrder(QDataStream::BigEndian);
                  b_str << qint16(0x0000);
-
-
-                 //if(answer_size>NULL_ANSWER_SIZE)
-                 //  varBindList.append(b,answer_size-NULL_ANSWER_SIZE);
-
-
-                // qDebug() << getRequest->oid.b_oid->toHex();
-                // qDebug() <<"varBind:" <<varBindList.toHex();
 
                  //SNMP RESPONSE:
                  sendData.append(static_cast<char>(0xa2));

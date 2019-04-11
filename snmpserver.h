@@ -17,6 +17,8 @@ class SNMPServer:public QObject
   SNMPServer(QObject* parent=0);
   ~SNMPServer();
   QSharedPointer<QSettings> settings;
+  mongocxx::instance inst{};
+  mongocxx::client conn{mongocxx::uri{}};
 public:
     static   SNMPServer* instance(QObject* parent);
 
