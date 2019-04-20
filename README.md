@@ -1,5 +1,5 @@
 # QSNMP-CA
-QT Snmp common agent
+QT Snmp common agent. Only GET request.
 
 SNMP server with backend of MongoDB.
 
